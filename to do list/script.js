@@ -1,6 +1,7 @@
 
 
 let tareas = [];
+let deferredPrompt = null;
 
 function guardarTareas() {
     localStorage.setItem("tareas", JSON.stringify(tareas));
@@ -50,6 +51,8 @@ window.addEventListener("DOMContentLoaded", () => {
     tareas = cargarTareas();
     renderizarTareas();
 
+    const installBtn = document.getElementById("installBtn");
+
     document.getElementById("agregarBtn").addEventListener("click", agregar);
 
     document.getElementById("tarea").addEventListener("keydown", (evento) => {
@@ -57,4 +60,41 @@ window.addEventListener("DOMContentLoaded", () => {
             agregar();
         }
     });
+
+    window.addEventListener("beforeinstallprompt", (evento) => {
+        evento.preventDefault();
+        deferredPrompt = evento;
+        installBtn.hidden = false;
+    });
+
+    installBtn.addEventListener("click", async () => {
+        if (!deferredPrompt) {
+            alert("La instalación no está disponible en este navegador en este momento.");
+            return;
+        }
+
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+
+        if (outcome === "accepted") {
+            console.log("PWA instalada");
+        } else {
+            console.log("Instalación cancelada");
+        }
+
+        deferredPrompt = null;
+        installBtn.hidden = true;
+    });
+
+    window.addEventListener("appinstalled", () => {
+        installBtn.hidden = true;
+    });
+
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+                console.error("No se pudo registrar el service worker:", error);
+            });
+        });
+    }
 });
