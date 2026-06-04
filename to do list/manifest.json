@@ -2,7 +2,7 @@
   "short_name": "TDList",
   "name": "To Do List",
   "id": "./",
-  "start_url": "./",
+  "start_url": "/to-do-list/",
   "scope": "./",
   "display": "standalone",
   "background_color": "#00FFFF",
